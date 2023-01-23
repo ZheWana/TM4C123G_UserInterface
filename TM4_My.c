@@ -265,7 +265,7 @@ uint32_t PWM_Init(uint32_t ui32ClkDiv, uint32_t ui32PWMPin,
             return INIT_ERROR;
     }
     GPIOPinTypePWM(ui32Port, ui8Pins);
-    GPIOPinConfigure(ui32PinConfig | (ui32PWMPin & 0x3c0 << 2) | ((!(pwmbase == 0)) + 4));
+    GPIOPinConfigure(ui32PinConfig | ((ui32PWMPin & 0x3c0) << 2) | ((!(pwmbase == 0)) + 4));
 
     //GPIO端口引脚解锁
     if (HWREG(ui32Port + GPIO_O_LOCK) != GPIO_LOCK_UNLOCKED) {
