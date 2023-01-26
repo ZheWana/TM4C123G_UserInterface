@@ -505,7 +505,7 @@ uint8_t UART_RxINTInit(uint32_t uart_channel, void (*pfnHandler)(void)) {
  *         否则返回INIT_ERROR
  */
 uint8_t Timer_INTInit(uint32_t ui32Interrupt, uint32_t ui32Freq, void (*pfnHandler)(void)) {
-    uint32_t ui32Base, ui32Timer, ui32Peripheral;
+    uint32_t ui32Base, ui32Timer, ui32Peripheral, ui32IntFlags;
     switch (ui32Interrupt) {
         case INT_TIMER0A:
             ui32Peripheral = SYSCTL_PERIPH_TIMER0;
@@ -570,13 +570,22 @@ uint8_t Timer_INTInit(uint32_t ui32Interrupt, uint32_t ui32Freq, void (*pfnHandl
         default:
             return INIT_ERROR;
     }
+
+    // 选择对应的的ui32IntFlags,用于TimerIntEnable时使用
+    if(ui32Timer == TIMER_A){
+        ui32IntFlags = TIMER_TIMA_TIMEOUT;
+    }
+    else{
+        ui32IntFlags = TIMER_TIMB_TIMEOUT;
+    }
+    
     IntPrioritySet(ui32Interrupt, 0x00);
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER0);
+    SysCtlPeripheralEnable(ui32Peripheral);
     TimerConfigure(ui32Base, TIMER_CFG_PERIODIC);
     TimerLoadSet(ui32Base, ui32Timer, SysCtlClockGet() / ui32Freq - 1);
     TimerIntRegister(ui32Base, ui32Timer, pfnHandler);
     IntEnable(ui32Interrupt);
-    TimerIntEnable(ui32Base, TIMER_TIMA_TIMEOUT);
+    TimerIntEnable(ui32Base, ui32IntFlags);
     IntMasterEnable();
     TimerEnable(ui32Base, ui32Timer);
     return INIT_OK;
